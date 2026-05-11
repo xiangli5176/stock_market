@@ -1,0 +1,5 @@
+yfinance==0.2.32
+pandas==2.1.1
+numpy==1.24.3
+jupyter==1.0.0
+ipython==8.15.0
