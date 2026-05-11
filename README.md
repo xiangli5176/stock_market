@@ -36,22 +36,39 @@ git clone https://github.com/yourusername/stock_market.git
 cd stock_market
 ```
 
-### 2. Create a Virtual Environment (Recommended)
+### 2. Install Dependencies with `uv`
+
+This project uses [uv](https://github.com/astral-sh/uv) for fast and reliable Python package management.
 
 ```bash
-# On Linux/macOS
-python3 -m venv venv
-source venv/bin/activate
+# Install dependencies
+uv sync
 
-# On Windows
-python -m venv venv
-venv\Scripts\activate
+# Or with development dependencies
+uv sync --extra dev
 ```
 
-### 3. Install Dependencies
+If you don't have `uv` installed yet:
+```bash
+# On macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# On Windows
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Or with pip
+pip install uv
+```
+
+### 3. Using the Virtual Environment
 
 ```bash
-pip install -r requirements.txt
+# Activate the virtual environment created by uv
+source .venv/bin/activate  # On Linux/macOS
+.venv\Scripts\activate     # On Windows
+
+# Or run commands directly with uv
+uv run python script.py
 ```
 
 ## Usage
@@ -225,7 +242,11 @@ See the `demo/stock_tracking_examples.ipynb` Jupyter notebook for comprehensive 
 To run the notebook:
 
 ```bash
-jupyter notebook demo/stock_tracking_examples.ipynb
+# Install development dependencies first
+uv sync --extra dev
+
+# Then run jupyter
+uv run jupyter notebook demo/stock_tracking_examples.ipynb
 ```
 
 ## Limitations
