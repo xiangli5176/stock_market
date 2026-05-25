@@ -13,6 +13,39 @@ class StockFetcher:
         """Initialize the stock fetcher."""
         pass
     
+    @staticmethod
+    def _parse_historical_dataframe(symbol: str, hist) -> List[HistoricalData]:
+        """Parse a yfinance history DataFrame into a list of HistoricalData objects.
+        
+        Handles newer versions of yfinance (>=1.3.0) where 'Adj Close' column
+        may be absent (prices are already adjusted).
+        
+        Args:
+            symbol: Stock ticker symbol
+            hist: DataFrame from yfinance Ticker.history()
+            
+        Returns:
+            List of HistoricalData objects
+        """
+        historical_data = []
+        has_adj_close = 'Adj Close' in hist.columns
+        
+        for date, row in hist.iterrows():
+            historical_data.append(
+                HistoricalData(
+                    symbol=symbol.upper(),
+                    date=date,
+                    open_price=float(row['Open']),
+                    high_price=float(row['High']),
+                    low_price=float(row['Low']),
+                    close_price=float(row['Close']),
+                    volume=int(row['Volume']),
+                    adjusted_close=float(row['Adj Close']) if has_adj_close else float(row['Close'])
+                )
+            )
+        
+        return historical_data
+    
     def fetch_quote(self, symbol: str) -> Optional[Stock]:
         """Fetch current stock quote information.
         
@@ -69,20 +102,7 @@ class StockFetcher:
             ticker = yf.Ticker(symbol.upper())
             hist = ticker.history(period=period, interval=interval)
             
-            historical_data = []
-            for date, row in hist.iterrows():
-                historical_data.append(
-                    HistoricalData(
-                        symbol=symbol.upper(),
-                        date=date,
-                        open_price=float(row['Open']),
-                        high_price=float(row['High']),
-                        low_price=float(row['Low']),
-                        close_price=float(row['Close']),
-                        volume=int(row['Volume']),
-                        adjusted_close=float(row['Adj Close'])
-                    )
-                )
+            historical_data = self._parse_historical_dataframe(symbol, hist)
             
             stock = Stock(symbol=symbol)
             stock.add_historical_data(historical_data)
@@ -116,20 +136,7 @@ class StockFetcher:
             ticker = yf.Ticker(symbol.upper())
             hist = ticker.history(period=period, interval=interval)
             
-            historical_data = []
-            for date, row in hist.iterrows():
-                historical_data.append(
-                    HistoricalData(
-                        symbol=symbol.upper(),
-                        date=date,
-                        open_price=float(row['Open']),
-                        high_price=float(row['High']),
-                        low_price=float(row['Low']),
-                        close_price=float(row['Close']),
-                        volume=int(row['Volume']),
-                        adjusted_close=float(row['Adj Close'])
-                    )
-                )
+            historical_data = self._parse_historical_dataframe(symbol, hist)
             
             stock.add_historical_data(historical_data)
             return stock
@@ -137,6 +144,48 @@ class StockFetcher:
         except Exception as e:
             print(f"Error fetching quote and history for {symbol}: {str(e)}")
             return Stock(symbol=symbol)
+    
+    def fetch_quote_and_history_safe(
+        self,
+        symbol: str,
+        period: str = "1mo",
+        interval: str = "1d"
+    ) -> Stock:
+        """Fetch both current quote and historical data, with graceful fallback.
+        
+        Unlike fetch_quote_and_history, this method ensures the returned Stock
+        always has historical data attached even if the quote fetch fails.
+        
+        Args:
+            symbol: Stock ticker symbol (e.g., 'AAPL')
+            period: Time period for historical data
+            interval: Data interval for historical data
+            
+        Returns:
+            Stock object with historical data (quote may be None if unavailable)
+        """
+        stock = Stock(symbol=symbol)
+        
+        # Try fetching quote
+        try:
+            quote_stock = self.fetch_quote(symbol)
+            if quote_stock and quote_stock.quote:
+                stock.quote = quote_stock.quote
+        except Exception as e:
+            print(f"Warning: Could not fetch quote for {symbol}: {str(e)}")
+        
+        # Fetch historical data
+        try:
+            ticker = yf.Ticker(symbol.upper())
+            hist = ticker.history(period=period, interval=interval)
+            
+            historical_data = self._parse_historical_dataframe(symbol, hist)
+            
+            stock.add_historical_data(historical_data)
+        except Exception as e:
+            print(f"Error fetching historical data for {symbol}: {str(e)}")
+        
+        return stock
     
     def fetch_multiple_quotes(self, symbols: List[str]) -> Dict[str, Stock]:
         """Fetch quotes for multiple stocks.

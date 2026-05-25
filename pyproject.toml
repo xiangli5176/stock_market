@@ -34,6 +34,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "jupyter>=1.0.0",
+    "ipykernel>=6.29.0",
     "ipython>=8.15.0",
     "pytest>=7.4.0",
     "black>=23.0.0",
@@ -56,3 +57,9 @@ target-version = ["py39"]
 target-version = "py39"
 line-length = 88
 select = ["E", "F", "W", "I"]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.31.0",
+]
+
