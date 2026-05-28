@@ -3,3 +3,6 @@ pandas==2.1.1
 numpy==1.24.3
 jupyter==1.0.0
 ipython==8.15.0
+
+# Optional: Robinhood fetcher (requires manual installation)
+# pip install robin-stocks>=3.1.0

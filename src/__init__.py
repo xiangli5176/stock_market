@@ -1,16 +1,17 @@
 """Stock Market Information Tracing App.
 
-A Python application for fetching and tracking stock market information
-using official APIs (yfinance).
+A Python application for fetching and tracking stock market information.
 
 Main Components:
     - Stock, Quote, HistoricalData: Core data models
-    - StockFetcher: Data fetching from Yahoo Finance
+    - StockFetcher: Data fetching from Yahoo Finance (yfinance)
+    - RobinhoodFetcher: Data fetching from Robinhood (robin_stocks, unofficial)
     - Utility functions: CSV export and data formatting
 """
 
 from .models import Stock, Quote, HistoricalData
 from .fetcher import StockFetcher
+from .robinhood_fetcher import RobinhoodFetcher, RobinhoodFetcherBuilder, RobinhoodAuthError
 from .utils import (
     export_quote_to_csv,
     export_historical_to_csv,
@@ -33,6 +34,9 @@ __all__ = [
     'HistoricalData',
     # Fetcher
     'StockFetcher',
+    'RobinhoodFetcher',
+    'RobinhoodFetcherBuilder',
+    'RobinhoodAuthError',
     # Utilities
     'export_quote_to_csv',
     'export_historical_to_csv',
